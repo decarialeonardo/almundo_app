@@ -9,6 +9,8 @@ const order = require('gulp-order');
 const concat = require('gulp-concat');
 const merge = require('merge-stream');
 const templateCache = require('gulp-angular-templatecache');
+const gulpsync = require('gulp-sync')(gulp);
+
 
 const getFolders = function(dir){
   return fs.readdirSync(dir)
@@ -55,14 +57,10 @@ gulp.task('nodemon', () => {
   });
 });
 
-gulp.task('sass', function () {
+gulp.task('sass', () => {
   return gulp.src('public/scss/**/*.scss')
     .pipe(sass.sync().on('error', sass.logError))
     .pipe(gulp.dest('public/css'));
-});
-
-gulp.task('sass:watch', function () {
-  gulp.watch('public/scss/**/*.scss', ['sass']);
 });
 
 gulp.task('convertPugToHTML', function buildHTML() {
@@ -73,14 +71,10 @@ gulp.task('convertPugToHTML', function buildHTML() {
     .pipe(gulp.dest('public/js'));
 });
 
-gulp.task('compress', function (cb) {
-  pump([
-        gulp.src('public/*.js'),
-        uglify(),
-        gulp.dest('dist')
-    ],
-    cb
-  );
+gulp.task('watch', () => {
+	gulp.watch(['public/scss/**/*.scss'], ['sass']);
+	gulp.watch(['public/js/**/*.js', '!public/js/**/*pkg*.js'], ['package']);
+	gulp.watch(['public/js/**/*.pug', '!./public/js/**/*.html'], gulpsync.sync(['convertPugToHTML','template-cache']));
 });
 
-gulp.task('default', ['nodemon','template-cache','convertPugToHTML','package', 'sass','sass:watch']);
+gulp.task('default', gulpsync.sync(['nodemon', 'template-cache', 'convertPugToHTML', 'package', 'sass', 'watch']));

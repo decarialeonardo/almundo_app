@@ -2,10 +2,10 @@
   angular
     .module('firstComp')
     .component('firstComp', {
-      templateUrl: 'first-comp.html',
+      templateUrl: 'components/first-comp/first-comp.html',
       controller: firstCompController,
       bindings: {
-        hola: '@'
+        name: '@'
       }
   });
 
