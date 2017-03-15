@@ -8,6 +8,7 @@ const path = require('path');
 const order = require('gulp-order');
 const concat = require('gulp-concat');
 const merge = require('merge-stream');
+const templateCache = require('gulp-angular-templatecache');
 
 const getFolders = function(dir){
   return fs.readdirSync(dir)
@@ -24,13 +25,23 @@ const getFolders = function(dir){
 gulp.task('package', () => {
   const folders = getFolders('public/js');
   const tasks = folders.map((folder) => {
-    return gulp.src([path.join('public/js', folder, '/**/*.js')])
+    return gulp.src([path.join('public/js', folder, '/**/*.js'), "!public/js/**/*-pkg.js"])
         .pipe(order(["**/*.module.js", "**/*.js"]))
         .pipe(concat(`${folder}-pkg.js`))
         .pipe(gulp.dest(path.join('public/js', folder)));
   });
 
   return merge(tasks);
+});
+
+gulp.task('template-cache', () =>{
+  return gulp.src('public/js/**/*.html')
+    .pipe(templateCache('app.template.js',{
+      module: 'App',
+      templateHeader: '(function() { angular.module("<%= module %>"<%= standalone %>).run(["$templateCache", function($templateCache) {',
+      templateFooter: '}])})();'
+    }))
+    .pipe(gulp.dest('public/js/app'))
 });
 
 gulp.task('nodemon', () => {
@@ -72,4 +83,4 @@ gulp.task('compress', function (cb) {
   );
 });
 
-gulp.task('default', ['nodemon','convertPugToHTML','package', 'sass','sass:watch']);
+gulp.task('default', ['nodemon','template-cache','convertPugToHTML','package', 'sass','sass:watch']);

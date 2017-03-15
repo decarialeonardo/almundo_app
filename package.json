@@ -20,6 +20,7 @@
     "body-parser": "^1.17.1",
     "express": "^4.15.2",
     "fs": "0.0.1-security",
+    "gulp-angular-templatecache": "^2.0.0",
     "gulp-concat": "^2.6.1",
     "gulp-nodemon": "^2.2.1",
     "gulp-order": "^1.1.1",

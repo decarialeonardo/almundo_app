@@ -2,3 +2,4 @@ node_modules/
 public/vendor/
 public/js/**/*.html
 public/js/**/*-pkg.js
+public/js/app/app.template.js
