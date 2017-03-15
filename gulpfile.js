@@ -3,11 +3,35 @@ const nodemon = require('gulp-nodemon');
 const sass = require('gulp-sass');
 const pug = require('gulp-pug');
 const uglify = require('gulp-uglify');
-const pump = require('pump');
+const fs = require('fs');
+const path = require('path');
+const order = require('gulp-order');
+const concat = require('gulp-concat');
+const merge = require('merge-stream');
+
+const getFolders = function(dir){
+  return fs.readdirSync(dir)
+    .filter((file) => {
+      return fs.statSync(path.join(dir, file)).isDirectory();
+    });
+};
+
 
 /**
  * Gulp Tasks
  */
+
+gulp.task('package', () => {
+  const folders = getFolders('public/js');
+  const tasks = folders.map((folder) => {
+    return gulp.src([path.join('public/js', folder, '/**/*.js')])
+        .pipe(order(["**/*.module.js", "**/*.js"]))
+        .pipe(concat(`${folder}-pkg.js`))
+        .pipe(gulp.dest(path.join('public/js', folder)));
+  });
+
+  return merge(tasks);
+});
 
 gulp.task('nodemon', () => {
   var called = false;
@@ -48,4 +72,4 @@ gulp.task('compress', function (cb) {
   );
 });
 
-gulp.task('default', ['nodemon','convertPugToHTML', 'sass','sass:watch']);
+gulp.task('default', ['nodemon','convertPugToHTML','package', 'sass','sass:watch']);
